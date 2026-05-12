@@ -1,53 +1,55 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
+CONFIG_TEMPLATE="$SCRIPT_DIR/config.template.json"
+CONFIG="$SCRIPT_DIR/config.json"
+LOG_FILE="$SCRIPT_DIR/xray.log"
+OUT_FILE="$SCRIPT_DIR/connection.txt"
 
-UUID_FILE=".uuid"
+# پاک کردن خروجی قبلی
+: > "$OUT_FILE"
+: > "$LOG_FILE"
 
-# اگر UUID قبلاً ساخته شده همان را استفاده کن
-if [ -f "$UUID_FILE" ]; then
-    UUID=$(cat "$UUID_FILE")
-else
-    UUID=$(uuidgen)
-    echo "$UUID" > "$UUID_FILE"
-fi
+# ساخت UUID جدید
+UUID=$(cat /proc/sys/kernel/random/uuid)
 
-# ساخت config
-sed "s/UUID/$UUID/g" config.template.json > config.json
+# ساخت هاست Codespace
+HOST="${CODESPACE_NAME}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 
-HOST="${CODESPACE_NAME:-codespace}-443.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-app.github.dev}"
+# تولید config نهایی از template
+sed "s/UUID/$UUID/g; s/HOST/$HOST/g" "$CONFIG_TEMPLATE" > "$CONFIG"
 
-echo ""
-echo "======================================"
-echo " XRAY READY "
-echo "======================================"
-echo ""
-echo "UUID:"
-echo "$UUID"
-echo ""
-echo "HOST:"
-echo "$HOST"
-echo ""
-echo "VLESS LINK:"
-echo ""
-echo "vless://${UUID}@${HOST}:443?encryption=none&security=none&type=xhttp&path=%2F#codespace-xray"
-echo ""
-echo "======================================"
-echo ""
+# اجرای Xray در پس‌زمینه
+xray -config "$CONFIG" > "$LOG_FILE" 2>&1 &
 
-# اگر xray قبلاً اجرا شده بود ببند
-pkill xray 2>/dev/null || true
-
-# اجرای xray در بک‌گراند
-nohup xray -config config.json > xray.log 2>&1 &
-
+# کمی صبر برای بالا آمدن سرویس
 sleep 2
 
-if pgrep xray >/dev/null; then
-    echo "Xray running ✅"
-else
-    echo "Xray failed ❌"
-    cat xray.log
-fi
+VLESS_LINK="vless://${UUID}@${HOST}:443?encryption=none&security=none&type=xhttp&path=%2F#codespace-xray"
+
+{
+  echo "======================================"
+  echo " XRAY READY "
+  echo "======================================"
+  echo
+  echo "UUID:"
+  echo "$UUID"
+  echo
+  echo "HOST:"
+  echo "$HOST"
+  echo
+  echo "VLESS LINK:"
+  echo
+  echo "$VLESS_LINK"
+  echo
+  echo "LOG FILE:"
+  echo "$LOG_FILE"
+  echo
+  echo "CONNECTION FILE:"
+  echo "$OUT_FILE"
+  echo
+  echo "Xray running ✅"
+  echo "======================================"
+} | tee "$OUT_FILE"
