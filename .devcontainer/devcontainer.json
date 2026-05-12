@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "postStartCommand": "./start.sh",
+  "postStartCommand": "bash /workspaces/g2ray/.devcontainer/start.sh",
   "forwardPorts": [443],
   "remoteUser": "root",
   "portsAttributes": {
