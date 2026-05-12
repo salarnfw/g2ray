@@ -1,21 +1,15 @@
 {
   "log": {
-    "access": "/tmp/xray.log",
-    "error": "/tmp/xray-error.log",
-    "loglevel": "info"
+    "loglevel": "warning"
   },
   "inbounds": [
     {
       "port": 443,
-      "listen": "0.0.0.0",
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "__UUID__",
-            "flow": "",
-            "level": 0,
-            "email": "user@example.com"
+            "id": "__UUID__"
           }
         ],
         "decryption": "none"
@@ -31,8 +25,7 @@
   ],
   "outbounds": [
     {
-      "protocol": "freedom",
-      "settings": {}
+      "protocol": "freedom"
     }
   ]
 }
