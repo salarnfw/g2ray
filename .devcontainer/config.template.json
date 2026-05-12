@@ -1,7 +1,5 @@
 {
   "log": {
-    "access": "/tmp/xray-access.log",
-    "error": "/tmp/xray-error.log",
     "loglevel": "warning"
   },
   "inbounds": [
@@ -12,16 +10,10 @@
       "settings": {
         "clients": [
           {
-            "id": "__UUID__",
-            "level": 0
+            "id": "__UUID__"
           }
         ],
-        "decryption": "none",
-        "fallbacks": [
-          {
-            "dest": 8080
-          }
-        ]
+        "decryption": "none"
       },
       "streamSettings": {
         "network": "xhttp",
