@@ -1,55 +1,51 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
+# مسیر پروژه
+WORKSPACE_DIR="/workspaces/g2ray/.devcontainer"
+UUID_FILE="$WORKSPACE_DIR/.uuid"
+CONFIG_TEMPLATE="$WORKSPACE_DIR/config.template.json"
+CONFIG_JSON="$WORKSPACE_DIR/config.json"
+CONNECTION_FILE="$WORKSPACE_DIR/connection.txt"
+LOG_FILE="$WORKSPACE_DIR/xray.log"
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_TEMPLATE="$SCRIPT_DIR/config.template.json"
-CONFIG="$SCRIPT_DIR/config.json"
-LOG_FILE="$SCRIPT_DIR/xray.log"
-OUT_FILE="$SCRIPT_DIR/connection.txt"
+# تولید UUID ثابت
+if [ ! -f "$UUID_FILE" ]; then
+    cat /proc/sys/kernel/random/uuid > "$UUID_FILE"
+fi
+UUID=$(cat "$UUID_FILE")
 
-# پاک کردن خروجی قبلی
-: > "$OUT_FILE"
-: > "$LOG_FILE"
+# چک اجرای قبلی xray (برای جلوگیری از چندباره اجرا)
+if pgrep -x "xray" > /dev/null; then
+    echo "Xray is already running."
+else
+    # ساخت فایل کانفیگ با جایگذاری UUID و HOST (میزبان ثابت، مثلا localhost یا آی‌پی مورد نظر)
+    HOST="example.com"  # وقتی Host واقعی داری تغییرش بده
 
-# ساخت UUID جدید
-UUID=$(cat /proc/sys/kernel/random/uuid)
+    sed -e "s/{{UUID}}/$UUID/g" -e "s/{{HOST}}/$HOST/g" "$CONFIG_TEMPLATE" > "$CONFIG_JSON"
 
-# ساخت هاست Codespace
-HOST="${CODESPACE_NAME}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+    # اجرای xray در پس‌زمینه با لاگ گرفتن
+    nohup /usr/local/bin/xray -config "$CONFIG_JSON" > "$LOG_FILE" 2>&1 &
 
-# تولید config نهایی از template
-sed "s/UUID/$UUID/g; s/HOST/$HOST/g" "$CONFIG_TEMPLATE" > "$CONFIG"
+    echo "Xray started. Log file: $LOG_FILE"
+fi
 
-# اجرای Xray در پس‌زمینه
-xray -config "$CONFIG" > "$LOG_FILE" 2>&1 &
+# ساخت و نمایش لینک اتصال VLESS با رنگ و قالب بندی
+VLESS_LINK="vless://$UUID@$HOST:443?security=tls&type=tcp#VLESS-$HOST"
 
-# کمی صبر برای بالا آمدن سرویس
-sleep 2
+cat <<EOF > "$CONNECTION_FILE"
+---------------------------------------
+🌟 Xray VLESS Connection Info 🌟
 
-VLESS_LINK="vless://${UUID}@${HOST}:443?encryption=none&security=none&type=xhttp&path=%2F#codespace-xray"
+UUID: $UUID
+HOST: $HOST
 
-{
-  echo "======================================"
-  echo " XRAY READY "
-  echo "======================================"
-  echo
-  echo "UUID:"
-  echo "$UUID"
-  echo
-  echo "HOST:"
-  echo "$HOST"
-  echo
-  echo "VLESS LINK:"
-  echo
-  echo "$VLESS_LINK"
-  echo
-  echo "LOG FILE:"
-  echo "$LOG_FILE"
-  echo
-  echo "CONNECTION FILE:"
-  echo "$OUT_FILE"
-  echo
-  echo "Xray running ✅"
-  echo "======================================"
-} | tee "$OUT_FILE"
+Connection Link:
+$VLESS_LINK
+
+Log file:
+$LOG_FILE
+---------------------------------------
+EOF
+
+# نمایش محتویات اتصال در ترمینال
+cat "$CONNECTION_FILE"
