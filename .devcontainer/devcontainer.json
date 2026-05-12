@@ -1,16 +1,14 @@
 {
-  "name": "Xray Codespace",
+  "name": "g2ray",
   "build": {
-    "dockerfile": "Dockerfile",
-    "context": "."
+    "dockerfile": "Dockerfile"
   },
-  "postStartCommand": "chmod +x /workspaces/g2ray/.devcontainer/start.sh && /workspaces/g2ray/.devcontainer/start.sh",
   "forwardPorts": [443],
-  "remoteUser": "root",
   "portsAttributes": {
     "443": {
-      "label": "Xray HTTPS",
-      "onAutoForward": "notify"
+      "label": "Xray VLESS",
+      "onAutoForward": "openBrowser"
     }
-  }
+  },
+  "postStartCommand": "chmod +x /workspaces/g2ray/.devcontainer/start.sh && bash /workspaces/g2ray/.devcontainer/start.sh"
 }
