@@ -9,17 +9,26 @@ RUN apt-get update && \
     ca-certificates \
     python3 \
     uuid-runtime \
-    tzdata
+    tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
+# ساخت پوشه xray
 RUN mkdir -p /etc/xray
 
-RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o xray.zip && \
+# دانلود و نصب Xray
+RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o /tmp/xray.zip && \
+    cd /tmp && \
     unzip xray.zip && \
     mv xray /usr/local/bin/xray && \
     chmod +x /usr/local/bin/xray && \
-    rm -rf xray.zip *.dat
+    rm -f /tmp/xray.zip && \
+    rm -f /tmp/*.dat
 
+# کپی فایل‌ها
 COPY start.sh /start.sh
+COPY config.template.json /config.template.json
+
+# دسترسی اجرا
 RUN chmod +x /start.sh
 
 EXPOSE 443
