@@ -10,7 +10,7 @@
   "portsAttributes": {
     "443": {
       "label": "Xray HTTPS",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "notify"
     }
   }
 }
