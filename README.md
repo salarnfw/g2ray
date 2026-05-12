@@ -1,5 +1,5 @@
 
-markdown
+
 # Xray on GitHub Codespaces (VLESS + xhttp)
 
 راه‌اندازی خودکار Xray (VLESS) روی GitHub Codespaces با هدف:
@@ -28,7 +28,7 @@ markdown
 در صفحه ریپو:
 Code → Codespaces → Create codespace
 
-text
+
 
 پس از Build شدن، اسکریپت `start.sh` به‌صورت خودکار اجرا می‌شود.
 
@@ -60,7 +60,7 @@ VLESS LINK:
 
 vless://…
 
-text
+
 
 همان لینک را در کلاینت خود وارد کنید.
 
