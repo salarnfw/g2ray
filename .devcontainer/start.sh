@@ -1,38 +1,100 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-UUID_FILE=/etc/xray/uuid.txt
-CONFIG=/etc/xray/config.json
-TEMPLATE=/config.template.json
+echo "======================================"
+echo " Starting Xray Setup "
+echo "======================================"
 
-mkdir -p /etc/xray
+# Stop old processes if running
+pkill -f xray || true
+pkill -f "curl -k" || true
 
-# UUID فقط یک‌بار
-if [ ! -f "$UUID_FILE" ]; then
-  uuidgen > "$UUID_FILE"
+# Create UUID only once
+if [ ! -f /etc/xray/uuid.txt ]; then
+    uuidgen > /etc/xray/uuid.txt
 fi
-UUID=$(cat "$UUID_FILE")
 
-sed "s/__UUID__/$UUID/g" "$TEMPLATE" > "$CONFIG"
+UUID=$(cat /etc/xray/uuid.txt)
 
-# اجرای Xray
-/usr/local/bin/xray -config "$CONFIG" >/tmp/xray.log 2>&1 &
+# Generate config from template
+sed "s/__UUID__/$UUID/g" /config.template.json > /etc/xray/config.json
 
-# keep-alive داخلی (بدون اینترنت)
-(
-  while true; do
-    curl -s http://127.0.0.1:443 >/dev/null 2>&1 || true
+echo ""
+echo "Generated UUID:"
+echo "$UUID"
+
+# Start Xray
+nohup xray -config /etc/xray/config.json > /tmp/xray.log 2>&1 &
+
+sleep 3
+
+# Keep Codespace alive with local traffic
+nohup bash -c '
+while true; do
+    curl -k -s https://127.0.0.1:443 >/dev/null 2>&1 || true
     sleep 60
-  done
-) &
+done
+' >/tmp/keepalive.log 2>&1 &
 
-HOST="${CODESPACE_NAME}-443.app.github.dev"
+# Build Codespace hostname
+CODESPACE_HOST="${CODESPACE_NAME}-443.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+
+# Generate VLESS link
+VLESS_LINK="vless://${UUID}@${CODESPACE_HOST}:443?encryption=none&security=none&type=xhttp&path=%2F#codespace-xray"
 
 echo ""
-echo "=============================="
-echo "Xray READY"
-echo "UUID: $UUID"
+echo "======================================"
+echo " XRAY READY "
+echo "======================================"
 echo ""
+
+echo "UUID:"
+echo "$UUID"
+echo ""
+
 echo "VLESS LINK:"
-echo "vless://$UUID@$HOST:443?encryption=none&type=xhttp&mode=packet-up&path=%2F#Codespace-Xray"
-echo "=============================="
+echo "$VLESS_LINK"
+echo ""
+
+echo "======================================"
+echo " IMPORTANT ACTION REQUIRED "
+echo "======================================"
+echo ""
+echo "You must make port 443 PUBLIC."
+echo ""
+echo "1. Open:"
+echo "https://github.com/codespaces"
+echo ""
+echo "2. Open your current Codespace"
+echo ""
+echo "3. Go to:"
+echo "Ports -> 443 -> Visibility -> Public"
+echo ""
+echo "After that, your VLESS link will work."
+echo ""
+
+echo "======================================"
+echo " LOG FILES "
+echo "======================================"
+echo ""
+echo "Xray log:"
+echo "/tmp/xray.log"
+echo ""
+echo "Keepalive log:"
+echo "/tmp/keepalive.log"
+echo ""
+
+echo "======================================"
+echo " STATUS "
+echo "======================================"
+
+if pgrep -f xray >/dev/null; then
+    echo "Xray is RUNNING"
+else
+    echo "Xray FAILED to start"
+    echo ""
+    echo "Last log output:"
+    tail -20 /tmp/xray.log || true
+fi
+
+echo "======================================"
