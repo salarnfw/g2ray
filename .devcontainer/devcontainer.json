@@ -1,7 +1,7 @@
 {
   "name": "xray-codespace",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "../Dockerfile"
   },
   "forwardPorts": [443, 8080],
   "portsAttributes": {
