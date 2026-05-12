@@ -1,9 +1,9 @@
 {
   "name": "Xray Codespace",
   "build": {
-  "dockerfile": "Dockerfile",
-  "context": ".."
-},
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "postStartCommand": "./start.sh",
   "forwardPorts": [443],
   "remoteUser": "root",
