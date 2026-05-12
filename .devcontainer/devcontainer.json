@@ -3,23 +3,6 @@
   "build": {
     "dockerfile": "../Dockerfile"
   },
-  "forwardPorts": [443, 8080],
-  "portsAttributes": {
-    "443": {
-      "label": "xray",
-      "visibility": "public"
-    },
-    "8080": {
-      "label": "health",
-      "visibility": "public"
-    }
-  },
   "postStartCommand": "bash /start.sh",
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
-      }
-    }
-  }
+  "forwardPorts": [443]
 }
