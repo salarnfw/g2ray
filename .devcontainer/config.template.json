@@ -1,16 +1,21 @@
 {
   "log": {
-    "loglevel": "warning"
+    "access": "/tmp/xray.log",
+    "error": "/tmp/xray-error.log",
+    "loglevel": "info"
   },
   "inbounds": [
     {
-      "listen": "0.0.0.0",
       "port": 443,
+      "listen": "0.0.0.0",
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "__UUID__"
+            "id": "__UUID__",
+            "flow": "",
+            "level": 0,
+            "email": "user@example.com"
           }
         ],
         "decryption": "none"
@@ -19,7 +24,6 @@
         "network": "xhttp",
         "security": "none",
         "xhttpSettings": {
-          "mode": "packet-up",
           "path": "/"
         }
       }
@@ -27,7 +31,8 @@
   ],
   "outbounds": [
     {
-      "protocol": "freedom"
+      "protocol": "freedom",
+      "settings": {}
     }
   ]
 }
