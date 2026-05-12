@@ -19,8 +19,9 @@ RUN wget -O /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/down
 COPY start.sh /start.sh
 COPY config.template.json /config.template.json
 
+
+
 # دادن دسترسی اجرا به اسکریپت استارت
 RUN chmod +x /start.sh
-
 # دستور شروع پیش‌فرض کانتینر (می‌توان بعداً override کرد)
 CMD ["/start.sh"]
