@@ -1,7 +1,6 @@
-# 1️⃣ ایمیج پایه
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-# 2️⃣ نصب ابزارهای لازم
+# نصب ابزارهای پایه + uuid-runtime + unzip
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     git \
     curl \
@@ -9,20 +8,24 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     vim \
     ca-certificates \
     uuid-runtime \
+    unzip \
  && rm -rf /var/lib/apt/lists/*
 
-# 3️⃣ کپی فایل‌ها
+# نصب Xray
+RUN cd /tmp \
+ && curl -L -o xray-linux-64.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip \
+ && unzip xray-linux-64.zip -d xray-dist \
+ && mv xray-dist/xray /usr/local/bin/xray \
+ && chmod +x /usr/local/bin/xray \
+ && rm -rf xray-dist xray-linux-64.zip
+
+# کپی فایل‌ها
 COPY start.sh /start.sh
 COPY config.template.json /config.template.json
 
-# 4️⃣ مجوز اجرا
+# مجوز اجرا
 RUN chmod +x /start.sh
 
-# 5️⃣ کاربر
 USER root
-
-# 6️⃣ پورت
 EXPOSE 443
-
-# 7️⃣ دستور پیش‌فرض
 CMD ["/bin/bash"]
