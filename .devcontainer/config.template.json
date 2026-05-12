@@ -1,7 +1,4 @@
 {
-  "log": {
-    "loglevel": "warning"
-  },
   "inbounds": [
     {
       "port": 443,
@@ -9,7 +6,10 @@
       "settings": {
         "clients": [
           {
-            "id": "__UUID__"
+            "id": "__UUID__",
+            "flow": "",
+            "level": 0,
+            "email": "user@example.com"
           }
         ],
         "decryption": "none"
@@ -25,7 +25,8 @@
   ],
   "outbounds": [
     {
-      "protocol": "freedom"
+      "protocol": "freedom",
+      "settings": {}
     }
   ]
 }
