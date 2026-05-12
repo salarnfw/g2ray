@@ -1,21 +1,39 @@
 {
+  "log": {
+    "loglevel": "warning"
+  },
   "inbounds": [
     {
+      "listen": "0.0.0.0",
       "port": 443,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "{{UUID}}",
-            "level": 0,
-            "email": "user@example.com"
+            "id": "{{UUID}}"
           }
         ],
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp",
-        "security": "tls"
+        "network": "xhttp",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "{{HOST}}",
+          "alpn": [
+            "http/1.1"
+          ],
+          "certificates": [
+            {
+              "certificateFile": "/workspaces/g2ray/.devcontainer/cert.pem",
+              "keyFile": "/workspaces/g2ray/.devcontainer/key.pem"
+            }
+          ]
+        },
+        "xhttpSettings": {
+          "path": "/",
+          "mode": "packet-up"
+        }
       }
     }
   ],
