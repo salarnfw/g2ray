@@ -1,8 +1,19 @@
 {
-  "name": "xray-codespace",
+  "name": "Xray Codespace",
   "build": {
-    "dockerfile": "../Dockerfile"
+    "dockerfile": "Dockerfile"
   },
   "postStartCommand": "bash /start.sh",
-  "forwardPorts": [443]
+  "portsAttributes": {
+    "443": {
+      "label": "Xray VLESS Port",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    }
+  },
+  "forwardPorts": [443],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "remoteUser": "root"
 }
