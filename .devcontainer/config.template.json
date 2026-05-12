@@ -1,0 +1,41 @@
+{
+  "log": {
+    "access": "/tmp/xray-access.log",
+    "error": "/tmp/xray-error.log",
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "listen": "0.0.0.0",
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "__UUID__",
+            "level": 0
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": [
+          {
+            "dest": 8080
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "none",
+        "xhttpSettings": {
+          "mode": "packet-up",
+          "path": "/"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}
