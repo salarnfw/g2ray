@@ -1,17 +1,16 @@
 {
-  "name": "xray-codespace",
+  "name": "Xray Codespace",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".devcontainer"
   },
-
-  "postStartCommand": "bash /start.sh",
-
+  "postStartCommand": "./start.sh",
   "forwardPorts": [443],
-
+  "remoteUser": "root",
   "portsAttributes": {
     "443": {
-      "label": "xray",
-      "onAutoForward": "notify"
+      "label": "Xray HTTPS",
+      "onAutoForward": "openBrowser"
     }
   }
 }
