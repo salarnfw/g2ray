@@ -1,17 +1,26 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+FROM ubuntu:22.04
 
-RUN apt-get update \
- && apt-get install -y curl unzip uuid-runtime \
- && mkdir -p /etc/xray
+# نصب پکیج‌های مورد نیاز شامل curl و uuidgen
+RUN apt-get update && apt-get install -y \
+    curl \
+    uuid-runtime \
+    bash \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# install xray
-RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o xray.zip \
- && unzip xray.zip \
- && mv xray /usr/local/bin/xray \
- && chmod +x /usr/local/bin/xray \
- && rm -rf xray.zip geo*
+# دانلود آخرین نسخه xray و نصب آن
+RUN wget -O /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
+    unzip /tmp/xray.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/xray && \
+    rm /tmp/xray.zip
 
+# کپی کردن فایل‌های اسکریپت و کانفیگ به کانتینر
 COPY start.sh /start.sh
 COPY config.template.json /config.template.json
 
+# دادن دسترسی اجرا به اسکریپت استارت
 RUN chmod +x /start.sh
+
+# دستور شروع پیش‌فرض کانتینر (می‌توان بعداً override کرد)
+CMD ["/start.sh"]
