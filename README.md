@@ -1,23 +1,82 @@
-only works in places where you can open github codespaces
+# Xray (VLESS + xhttp) روی GitHub Codespaces (بدون UptimeRobot)
 
-## setup
-1. fork the repo
-2. click the green "Code" button above, go to the "Codespaces" tab, and click "Create codespace on main."
+این پروژه Xray را داخل GitHub Codespaces اجرا می‌کند و به‌صورت خودکار:
+- UUID اختصاصی (یک‌بار) تولید می‌کند
+- `config.json` را از روی قالب می‌سازد
+- سرویس Xray را بالا می‌آورد
+- لینک VLESS آماده استفاده را در ترمینال چاپ می‌کند
 
-## how to use
-- wait some minutes for the codespace. it needs some time to setup everything.
-- once it's ready, your vless link will be printed right there in terminal tab
-![terminal](./docs/screenshot.png)
+> نکته: در Codespaces هیچ راه ۱۰۰٪ تضمینی برای جلوگیری از Suspend وجود ندارد؛ اما این تنظیمات سبک است و معمولاً پایدارتر از روش‌های مانیتور خارجی عمل می‌کند.
 
-- copy the link into your v2rayng (or your fav proxy app)
+---
 
-## notes
-- github gives you 120 free hours per cpu cores for a month
-- so if your codespace has 2 cores, the limit will be 60 hours per month
-- remember to stop the codespace when you aren't using it, to save your hours
+## پیش‌نیازها
+- یک اکانت GitHub با دسترسی به Codespaces
+- Fork کردن ریپو (پیشنهادی)
 
-tested on shecan (free plan). so if you can see any of these ips, it'll work for you. if not, try other datacenters/ISPs:
-- 63.141.252.203
-- 50.7.5.83
-- 63.141.252.203
-- 94.130.50.12
+---
+
+## راه‌اندازی سریع (Step-by-step)
+
+### 1) ساخت Codespace
+1. وارد ریپو شوید
+2. گزینه **Code** → تب **Codespaces**
+3. **Create codespace on main** را بزنید
+4. صبر کنید کانتینر Build شود
+
+پس از بالا آمدن Codespace، اسکریپت `start.sh` به صورت خودکار اجرا می‌شود (از طریق `postStartCommand`).
+
+---
+
+## کارهای دستی لازم (مهم)
+
+### A) Public کردن پورت 443 (یک‌بار)
+برای اینکه از بیرون بتوانید وصل شوید باید پورت 443 را **Public** کنید:
+
+1. در VS Code (داخل Codespace) به تب **Ports** بروید
+2. پورت **443** را پیدا کنید
+3. از ستون **Visibility** آن را روی **Public** بگذارید
+
+> این مورد توسط GitHub به دلایل امنیتی قابل اتوماتیک‌سازی نیست.
+
+---
+
+## دریافت لینک اتصال (VLESS)
+
+بعد از اجرای `start.sh` در ترمینال چیزی شبیه زیر چاپ می‌شود:
+
+- `UUID: ...`
+- `VLESS LINK: vless://...`
+
+همان لینک را داخل کلاینت خود (مثلاً v2rayNG / Nekobox / v2rayN) وارد کنید.
+
+---
+
+## فایل‌ها و نحوه کار
+
+### `config.template.json`
+قالب کانفیگ است و به جای UUID واقعی از placeholder زیر استفاده می‌کند:
+
+- `__UUID__`
+
+### `start.sh`
+در هر بار شروع Codespace:
+1. اگر `/etc/xray/uuid.txt` وجود نداشته باشد، یک UUID جدید می‌سازد
+2. مقدار UUID را داخل `config.template.json` جایگزین می‌کند
+3. خروجی را در مسیر زیر می‌سازد:
+   - `/etc/xray/config.json`
+4. Xray را اجرا می‌کند
+5. لینک اتصال را چاپ می‌کند
+
+---
+
+## عیب‌یابی (Troubleshooting)
+
+### 1) لینک وصل نمی‌شود
+- مطمئن شوید پورت **443 Public** شده است (تب Ports)
+- مطمئن شوید کلاینت شما پارامترهای لینک را دقیق قبول می‌کند (xhttp + packet-up)
+
+### 2) سرویس بالا نیامده
+لاگ‌ها:
+```bash
+tail -n 200 /tmp/xray.log
