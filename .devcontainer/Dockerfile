@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-# نصب ابزارهای پایه + uuid-runtime + unzip
+# نصب ابزارهای مورد نیاز از جمله git، curl، uuid-runtime، unzip و ...
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     git \
     curl \
@@ -11,7 +11,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     unzip \
  && rm -rf /var/lib/apt/lists/*
 
-# نصب Xray
+# دانلود و نصب هسته Xray
 RUN cd /tmp \
  && curl -L -o xray-linux-64.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip \
  && unzip xray-linux-64.zip -d xray-dist \
@@ -19,13 +19,14 @@ RUN cd /tmp \
  && chmod +x /usr/local/bin/xray \
  && rm -rf xray-dist xray-linux-64.zip
 
-# کپی فایل‌ها
-COPY start.sh /start.sh
-COPY config.template.json /config.template.json
+# کپی فایل‌های اسکریپت و پیکربندی به داخل کانتینر
+COPY start.sh /workspaces/g2ray/.devcontainer/start.sh
+COPY config.template.json /workspaces/g2ray/.devcontainer/config.template.json
 
-# مجوز اجرا
-RUN chmod +x /start.sh
+# دسترسی اجرایی به start.sh
+RUN chmod +x /workspaces/g2ray/.devcontainer/start.sh
 
 USER root
 EXPOSE 443
+
 CMD ["/bin/bash"]
