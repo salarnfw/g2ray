@@ -6,8 +6,7 @@
       "settings": {
         "clients": [
           {
-            "id": "UUID",
-            "flow": "",
+            "id": "{{UUID}}",
             "level": 0,
             "email": "user@example.com"
           }
@@ -15,18 +14,14 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "xhttp",
-        "security": "none",
-        "xhttpSettings": {
-          "path": "/"
-        }
+        "network": "tcp",
+        "security": "tls"
       }
     }
   ],
   "outbounds": [
     {
-      "protocol": "freedom",
-      "settings": {}
+      "protocol": "freedom"
     }
   ]
 }
