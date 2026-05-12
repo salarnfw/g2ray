@@ -1,37 +1,14 @@
-FROM debian:12
+FROM debian:12-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update && apt install -y \
+    curl wget unzip uuid-runtime \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y \
-    curl \
-    unzip \
-    ca-certificates \
-    python3 \
-    uuid-runtime \
-    tzdata && \
-    rm -rf /var/lib/apt/lists/*
+COPY install.sh /install.sh
+RUN chmod +x /install.sh && /install.sh
 
-# ساخت پوشه xray
-RUN mkdir -p /etc/xray
-
-# دانلود و نصب Xray
-RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o /tmp/xray.zip && \
-    cd /tmp && \
-    unzip xray.zip && \
-    mv xray /usr/local/bin/xray && \
-    chmod +x /usr/local/bin/xray && \
-    rm -f /tmp/xray.zip && \
-    rm -f /tmp/*.dat
-
-# کپی فایل‌ها
-COPY start.sh /start.sh
 COPY config.template.json /config.template.json
-
-# دسترسی اجرا
+COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 443
-EXPOSE 8080
-
-CMD ["sleep", "infinity"]
+CMD ["bash", "/start.sh", "&&", "sleep", "infinity"]
