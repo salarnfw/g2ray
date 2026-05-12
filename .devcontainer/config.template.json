@@ -6,7 +6,7 @@
       "settings": {
         "clients": [
           {
-            "id": "__UUID__",
+            "id": "UUID",
             "flow": "",
             "level": 0,
             "email": "user@example.com"
