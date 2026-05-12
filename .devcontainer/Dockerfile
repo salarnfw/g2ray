@@ -1,27 +1,27 @@
-FROM ubuntu:22.04
+# 1️⃣ ایمیج پایه (استاندارد Devcontainers با Ubuntu)
+FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-# نصب پکیج‌های مورد نیاز شامل curl و uuidgen
-RUN apt-get update && apt-get install -y \
+# 2️⃣ به‌روزرسانی و نصب ابزارهای لازم
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    git \
     curl \
-    uuid-runtime \
-    bash \
     wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+    vim \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-# دانلود آخرین نسخه xray و نصب آن
-RUN wget -O /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
-    unzip /tmp/xray.zip -d /usr/local/bin/ && \
-    chmod +x /usr/local/bin/xray && \
-    rm /tmp/xray.zip
-
-# کپی کردن فایل‌های اسکریپت و کانفیگ به کانتینر
+# 3️⃣ کپی فایل‌ها (همگی در کنار همین Dockerfile داخل .devcontainer هستند)
 COPY start.sh /start.sh
 COPY config.template.json /config.template.json
 
-
-
-# دادن دسترسی اجرا به اسکریپت استارت
+# 4️⃣ تنظیم مجوز اجرا برای اسکریپت شروع
 RUN chmod +x /start.sh
-# دستور شروع پیش‌فرض کانتینر (می‌توان بعداً override کرد)
-CMD ["/start.sh"]
+
+# 5️⃣ تنظیم کاربر پیش‌فرض برای VSCode
+USER root
+
+# 6️⃣ پورت‌ها (همان پورت 443 برای HTTPS)
+EXPOSE 443
+
+# 7️⃣ دستور نهایی (اختیاری، Devcontainer معمولاً از postStartCommand در devcontainer.json استفاده می‌کند)
+CMD ["/bin/bash"]
