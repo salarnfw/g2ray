@@ -1,32 +1,27 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-# نصب ابزارهای مورد نیاز از جمله git، curl، uuid-runtime، unzip و ...
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    git \
+RUN apt-get update && apt-get install -y \
     curl \
-    wget \
-    vim \
-    ca-certificates \
-    uuid-runtime \
     unzip \
- && rm -rf /var/lib/apt/lists/*
+    uuid-runtime \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# دانلود و نصب هسته Xray
-RUN cd /tmp \
- && curl -L -o xray-linux-64.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip \
- && unzip xray-linux-64.zip -d xray-dist \
- && mv xray-dist/xray /usr/local/bin/xray \
- && chmod +x /usr/local/bin/xray \
- && rm -rf xray-dist xray-linux-64.zip
+# نصب Xray
+RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o /tmp/xray.zip \
+    && unzip /tmp/xray.zip -d /tmp/xray \
+    && install /tmp/xray/xray /usr/local/bin/xray \
+    && chmod +x /usr/local/bin/xray \
+    && rm -rf /tmp/xray /tmp/xray.zip
 
-# کپی فایل‌های اسکریپت و پیکربندی به داخل کانتینر
-COPY start.sh /workspaces/g2ray/.devcontainer/start.sh
-COPY config.template.json /workspaces/g2ray/.devcontainer/config.template.json
+# ساخت self-signed cert برای TLS
+RUN openssl req -x509 -nodes -days 3650 \
+    -newkey rsa:2048 \
+    -keyout /tmp/key.pem \
+    -out /tmp/cert.pem \
+    -subj "/CN=localhost"
 
-# دسترسی اجرایی به start.sh
-RUN chmod +x /workspaces/g2ray/.devcontainer/start.sh
-
-USER root
-EXPOSE 443
-
-CMD ["/bin/bash"]
+RUN mkdir -p /workspaces/g2ray/.devcontainer \
+    && mv /tmp/cert.pem /workspaces/g2ray/.devcontainer/cert.pem \
+    && mv /tmp/key.pem /workspaces/g2ray/.devcontainer/key.pem
